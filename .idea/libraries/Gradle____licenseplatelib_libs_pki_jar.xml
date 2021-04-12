@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: ./licenseplatelib/libs/pki.jar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/licenseplatelib/libs/pki.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

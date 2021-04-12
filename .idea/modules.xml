@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LicensePlateDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/LicensePlateDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LicensePlateDemo.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LicensePlateDemo.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/licenseplatelib/LicensePlateDemo.licenseplatelib.iml" filepath="$PROJECT_DIR$/.idea/modules/licenseplatelib/LicensePlateDemo.licenseplatelib.iml" />
+    </modules>
+  </component>
+</project>
