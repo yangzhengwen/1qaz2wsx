@@ -96,8 +96,8 @@ public class ScenCameraActivity extends Activity implements
     private boolean isAutoFocus = true; // 是否开启自动对焦 true:开启，定时对焦 false:不开起
     // ，只在图片模糊时对焦
     private boolean sameProportion = false;   //是否在1280*960预览分辨率以下找到与屏幕比相同比例的 预览分辨率组
-    private int initPreWidth = 1920; //
-    private int initPreHeight = 1080;//预览分辨率筛选上限，即在筛选合适的分辨率时  在这两个值以下筛选
+    private int initPreWidth = 1280; //
+    private int initPreHeight = 720;//预览分辨率筛选上限，即在筛选合适的分辨率时  在这两个值以下筛选
     private boolean isFirstIn = true;
     public ServiceConnection recogConn = new ServiceConnection() {
         @Override
