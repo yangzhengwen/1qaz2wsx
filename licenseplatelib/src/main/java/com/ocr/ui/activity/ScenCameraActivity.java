@@ -1,5 +1,6 @@
 package com.ocr.ui.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
@@ -37,6 +38,10 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.cdjysd.licenseplatelib.utils.Devcode;
 import com.cdjysd.licenseplatelib.utils.Utils;
@@ -96,8 +101,8 @@ public class ScenCameraActivity extends Activity implements
     private boolean isAutoFocus = true; // 是否开启自动对焦 true:开启，定时对焦 false:不开起
     // ，只在图片模糊时对焦
     private boolean sameProportion = false;   //是否在1280*960预览分辨率以下找到与屏幕比相同比例的 预览分辨率组
-    private int initPreWidth = 1280; //
-    private int initPreHeight = 720;//预览分辨率筛选上限，即在筛选合适的分辨率时  在这两个值以下筛选
+    private int initPreWidth = 1920; //
+    private int initPreHeight = 1080;//预览分辨率筛选上限，即在筛选合适的分辨率时  在这两个值以下筛选
     private boolean isFirstIn = true;
     public ServiceConnection recogConn = new ServiceConnection() {
         @Override
@@ -578,12 +583,50 @@ public class ScenCameraActivity extends Activity implements
         }
     }
 
+    @SuppressLint("InlinedApi")
+    static final String[] PERMISSION = new String[]{
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.CAMERA};
+    private static final int PERMISSION_REQUESTCODE = 1;
+
     @Override
     protected void onResume() {
         // TODO Auto-generated method stub
         super.onResume();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            //没有授权
+            ActivityCompat.requestPermissions(this, PERMISSION, PERMISSION_REQUESTCODE);
+        } else {
+            OpenCameraAndSetParameters();
+        }
+    }
 
-        OpenCameraAndSetParameters();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case PERMISSION_REQUESTCODE:
+                boolean permissionsPASS = true;
+                for (int grantResult : grantResults) {
+                    if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                        //有任何一项权限没有通过，都会视为拒绝
+                        permissionsPASS = false;
+                    }
+                }
+                if (grantResults.length > 0 && permissionsPASS) {
+                    OpenCameraAndSetParameters();
+                } else {
+                    //用户拒绝了授权
+                    System.out.println("拒绝了权限");
+                    Toast.makeText(this, "权限被拒绝", Toast.LENGTH_SHORT).show();
+                    this.finish();
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -633,18 +676,23 @@ public class ScenCameraActivity extends Activity implements
             previewheight = size.height;
         } else {
             Iterator paramPoint = list.iterator();
-            Camera.Size localSize;
+            Point point = null;
             //判断当前尺寸有没有正好是屏幕尺寸的
             do {
                 if (!paramPoint.hasNext()) {
                     //遍历到最后都没找到当前屏幕尺寸的，选择最佳尺寸
-                    localSize = getCloselyPreSize(parameters, setPreWidth, setPreWidth);
+                    point = getCloselyPreSize(parameters, setPreWidth, setPreWidth);
                     break;
                 }
-                localSize = (Camera.Size) paramPoint.next();
-            } while ((localSize.width != setPreWidth) || (localSize.height != setPreHeight));
-            previewWidth = localSize.width;
-            previewheight = localSize.height;
+                size = (Camera.Size) paramPoint.next();
+            } while ((size.width != setPreWidth) || (size.height != setPreHeight));
+            if (point != null) {
+                previewWidth = point.x;
+                previewheight = point.y;
+            } else {
+                previewWidth = setPreWidth;
+                previewheight = setPreHeight;
+            }
         }
         preWidth = previewWidth;
         preHeight = previewheight;
@@ -678,35 +726,58 @@ public class ScenCameraActivity extends Activity implements
 
     }
 
+    /**
+     * 若未找到设置的预览分辨率   则寻找最接近预览分辨率（优先寻找同比例   例如1920*1080与1280*720 同比例）
+     *
+     * @param parameters 相机参数
+     * @param width      宽
+     * @param height     高
+     * @return 预览分辨率
+     */
+    private Point getCloselyPreSize(Camera.Parameters parameters, int width, int height) {
+        int reqtmpwidth = width;
+        int reqTmpHeight = height;
+        int realWidth = 0, realHeight = 0;
+        float reqRatio = (float) reqtmpwidth / (float) reqTmpHeight;
+        float deltaRatioMin = 3.4028235E38F;
+        List preSizeList = parameters.getSupportedPreviewSizes();
+        Camera.Size retSize = null;
+        Iterator var13 = preSizeList.iterator();
+        Camera.Size defaultSize;
+        while (var13.hasNext()) {
+            defaultSize = (Camera.Size) var13.next();
+            float realRatio = (float) defaultSize.width / (float) defaultSize.height;
+            if (reqRatio == realRatio) {
+                if (defaultSize.width <= 1920) {
+                    if (realWidth <= defaultSize.width) {
+                        realWidth = defaultSize.width;
+                        realHeight = defaultSize.height;
+//                        LogUtil.E(TAG, "筛选参数：" + realWidth + "   " + realHeight);
+                    }
+                }
 
-    private Camera.Size getCloselyPreSize(Camera.Parameters paramParameters, int paramWidth, int paramHeight) {
-        float f3 = paramWidth / paramHeight;
-        Iterator localIterator = paramParameters.getSupportedPreviewSizes().iterator();
-        Camera.Size size2 = null;
-        while (localIterator.hasNext()) {
-            Camera.Size size = (Camera.Size) localIterator.next();
-            if (f3 == ((float) size.width) / ((float) size.height) && size.width <= 1920 && width <= size.width) {
-                size2 = size;
             }
-        }
-        if (paramWidth == 0 || paramHeight == 0) {
-//            float f = AutoScrollHelper.NO_MAX;
-            float f = 3.4028235E38F;
 
-            while (localIterator.hasNext()) {
-                Camera.Size size3 = (Camera.Size) localIterator.next();
-                float abs = Math.abs(f3 - (((float) size3.width) / ((float) size3.height)));
-                if (abs < f) {
-                    size2 = size3;
-                    f = abs;
+        }
+        if (realWidth == 0 || realHeight == 0) {
+            while (var13.hasNext()) {
+                defaultSize = (Camera.Size) var13.next();
+                float curRatio = (float) defaultSize.width / (float) defaultSize.height;
+                float deltaRatio = Math.abs(reqRatio - curRatio);
+                if (deltaRatio < deltaRatioMin) {
+                    deltaRatioMin = deltaRatio;
+                    retSize = defaultSize;
+                    realWidth = defaultSize.width;
+                    realHeight = defaultSize.height;
                 }
             }
-            if (size2 == null) {
-                Camera.Size defaltSize = paramParameters.getPreviewSize();
-                size2 = defaltSize;
+            if (retSize == null) {
+                defaultSize = parameters.getPreviewSize();
+                retSize = defaultSize;
+//                LogUtil.D(TAG, "没找到合适的尺寸，使用默认尺寸: " + defaultSize);
             }
         }
-        return size2;
+        return new Point(realWidth, realHeight);
     }
 
     /**
