@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -176,6 +177,8 @@ public class ScenCameraActivity extends Activity implements
     };
 
     ScaleGestureDetector gestureDetector;
+    SharedPreferences mySharedPreferences;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,7 +191,8 @@ public class ScenCameraActivity extends Activity implements
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_scencamera);
         PlateRecogService.initializeType = recogType;
-
+        mySharedPreferences = getSharedPreferences("cameraParameter", Activity.MODE_PRIVATE);
+        editor = mySharedPreferences.edit();
         findiew();
         setRotationAndView(uiRot);
         getScreenSize();
@@ -215,6 +219,7 @@ public class ScenCameraActivity extends Activity implements
         // TODO Auto-generated method stub
 
         seekBar = ((SeekBar) findViewById(R.id.seekbar));
+        seekBar.setProgress(mySharedPreferences.getInt("zoom", 33));
         surfaceView = (SurfaceView) findViewById(R.id.surfaceViwe_video);
         back_btn = (Button) findViewById(R.id.back_camera);
         flash_btn = (Button) findViewById(R.id.flash_camera);
@@ -317,6 +322,8 @@ public class ScenCameraActivity extends Activity implements
                     if (parameters.isZoomSupported()) {
                         zoomF = ((double) camera.getParameters().getMaxZoom()) / 100.0d;
                         zoom = (int) (progress * zoomF);
+                        editor.putInt("zoom", zoom);
+                        editor.commit();
                         parameters.setZoom(zoom);
                         camera.setParameters(parameters);
                         return;
@@ -714,6 +721,7 @@ public class ScenCameraActivity extends Activity implements
             isAutoFocus = true;
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         }
+        parameters.setZoom(mySharedPreferences.getInt("zoom", 33));
         camera.setParameters(parameters);
         camera.setDisplayOrientation(rotation);
         try {
