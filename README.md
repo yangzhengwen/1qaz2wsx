@@ -1,1 +1,1 @@
-# 1qaz2wsx
+# ocr

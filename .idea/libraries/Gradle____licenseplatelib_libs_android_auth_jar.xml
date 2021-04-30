@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: ./licenseplatelib/libs/android_auth.jar">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/licenseplatelib/libs/android_auth.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
