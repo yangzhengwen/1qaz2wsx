@@ -58,6 +58,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class ScenCameraActivity extends Activity implements
@@ -194,6 +196,16 @@ public class ScenCameraActivity extends Activity implements
         getScreenSize();
         tempUiRot = 0;
     }
+
+    private boolean isContainChinese(String str) {
+        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
+    }
+
 
     // 设置相机取景方向和扫面框
     private void setRotationAndView(int uiRot) {
@@ -510,20 +522,22 @@ public class ScenCameraActivity extends Activity implements
 
                         number = fieldvalue[0];
 //                        color = fieldvalue[1];
-                        mVibrator = (Vibrator) getApplication()
-                                .getSystemService(Service.VIBRATOR_SERVICE);
-                        mVibrator.vibrate(100);
-                        closeCamera();
-                        // 此模式下跳转 请到MemoryResultActivity 更改下代码 有注释注意查看
-                        Intent intent = new Intent();
-                        intent.putExtra("number", number);
+                        if (isContainChinese(number.substring(0, 1))) {
+                            mVibrator = (Vibrator) getApplication()
+                                    .getSystemService(Service.VIBRATOR_SERVICE);
+                            mVibrator.vibrate(100);
+                            closeCamera();
+                            // 此模式下跳转 请到MemoryResultActivity 更改下代码 有注释注意查看
+                            Intent intent = new Intent();
+                            intent.putExtra("number", number);
 //                        intent.putExtra("color", color);
 //                        intent.putExtra("path", path);
-                        // intent.putExtra("time", fieldvalue[11]);
+                            // intent.putExtra("time", fieldvalue[11]);
 //                        intent.putExtra("recogType", false);
 //                        intent.putExtra("isatuo",true);//是否自动，true自动
-                        setResult(RESULT_OK, intent);
-                        this.finish();
+                            setResult(RESULT_OK, intent);
+                            this.finish();
+                        }
                     }
                 }
             } else {
@@ -864,61 +878,56 @@ public class ScenCameraActivity extends Activity implements
                                         bitmap.getHeight(), null, true);
 //                                path = savePicture(bitmap1);
 
-                                mVibrator = (Vibrator) getApplication()
-                                        .getSystemService(
-                                                Service.VIBRATOR_SERVICE);
-                                mVibrator.vibrate(100);
-                                closeCamera();
-                                ///////高精度，识别走着
-                                Intent intent = new Intent();
+
                                 number = fieldvalue[0];
-                                this.hpzl = getHpzl(fieldvalue[3]);
-                                if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("黄"))) {
-                                    this.hpzl = "01";
-                                }
-                                if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("蓝"))) {
-                                    this.hpzl = "02";
-                                }
-                                if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("绿"))) {
-                                    this.hpzl = "52";
-                                }
-                                if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("黄绿"))) {
-                                    this.hpzl = "51";
-                                }
-                                if (this.number.contains("使")) {
-                                    this.hpzl = "03";
-                                } else if (this.number.contains("领")) {
-                                    this.hpzl = "04";
-                                } else if (this.number.contains("挂")) {
-                                    this.hpzl = "15";
-                                } else if (this.number.contains("学")) {
-                                    this.hpzl = "16";
-                                } else if (this.number.contains("港")) {
-                                    this.hpzl = "26";
-                                } else if (this.number.contains("澳")) {
-                                    this.hpzl = "27";
-                                } else if (this.number.contains("军")) {
-                                    this.hpzl = "32";
-                                }
+                                if (isContainChinese(number.substring(0, 1))) {
+                                    mVibrator = (Vibrator) getApplication()
+                                            .getSystemService(
+                                                    Service.VIBRATOR_SERVICE);
+                                    mVibrator.vibrate(100);
+                                    closeCamera();
+                                    ///////高精度，识别走着
+                                    Intent intent = new Intent();
+                                    this.hpzl = getHpzl(fieldvalue[3]);
+                                    if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("黄"))) {
+                                        this.hpzl = "01";
+                                    }
+                                    if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("蓝"))) {
+                                        this.hpzl = "02";
+                                    }
+                                    if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("绿"))) {
+                                        this.hpzl = "52";
+                                    }
+                                    if ((this.hpzl.equals("44")) && (fieldvalue[1].equals("黄绿"))) {
+                                        this.hpzl = "51";
+                                    }
+                                    if (this.number.contains("使")) {
+                                        this.hpzl = "03";
+                                    } else if (this.number.contains("领")) {
+                                        this.hpzl = "04";
+                                    } else if (this.number.contains("挂")) {
+                                        this.hpzl = "15";
+                                    } else if (this.number.contains("学")) {
+                                        this.hpzl = "16";
+                                    } else if (this.number.contains("港")) {
+                                        this.hpzl = "26";
+                                    } else if (this.number.contains("澳")) {
+                                        this.hpzl = "27";
+                                    } else if (this.number.contains("军")) {
+                                        this.hpzl = "32";
+                                    }
 
-                                this.color = getHpColor(fieldvalue[1], fieldvalue[3]);
+                                    this.color = getHpColor(fieldvalue[1], fieldvalue[3]);
 
-                                intent.putExtra("number", number);
-                                intent.putExtra("hpzl", hpzl);
-                                intent.putExtra("color", color);
-                                setResult(RESULT_OK, intent);
-                                this.finish();
-
-
+                                    intent.putExtra("number", number);
+                                    intent.putExtra("hpzl", hpzl);
+                                    intent.putExtra("color", color);
+                                    setResult(RESULT_OK, intent);
+                                    this.finish();
+                                }
                             } else {
                                 String itemString = "";
 
-                                mVibrator = (Vibrator) getApplication()
-                                        .getSystemService(
-                                                Service.VIBRATOR_SERVICE);
-                                mVibrator.vibrate(100);
-                                closeCamera();
-                                Intent intent = new Intent();
                                 for (int i = 0; i < lenght; i++) {
 
                                     itemString = fieldvalue[0];
@@ -931,11 +940,17 @@ public class ScenCameraActivity extends Activity implements
                                     resultString = itemString.split(";");
 
                                 }
-
-                                intent.putExtra("number", number);
-                                setResult(RESULT_OK, intent);
-                                this.finish();
-
+                                if (isContainChinese(number.substring(0, 1))) {
+                                    mVibrator = (Vibrator) getApplication()
+                                            .getSystemService(
+                                                    Service.VIBRATOR_SERVICE);
+                                    mVibrator.vibrate(100);
+                                    closeCamera();
+                                    Intent intent = new Intent();
+                                    intent.putExtra("number", number);
+                                    setResult(RESULT_OK, intent);
+                                    this.finish();
+                                }
                             }
                         }
                     }
@@ -988,17 +1003,19 @@ public class ScenCameraActivity extends Activity implements
                         }
 
 //						if (null != fieldname) {
-                        mVibrator = (Vibrator) getApplication()
-                                .getSystemService(Service.VIBRATOR_SERVICE);
-                        mVibrator.vibrate(100);
-                        closeCamera();
-                        Intent intent = new Intent();
+
                         number = fieldvalue[0];
 //                        color = fieldvalue[1];
                         if (fieldvalue[0] == null) {
                             number = "null";
                         }
-//                        if (fieldvalue[1] == null) {
+                        if (isContainChinese(number.substring(0, 1))) {
+                            mVibrator = (Vibrator) getApplication()
+                                    .getSystemService(Service.VIBRATOR_SERVICE);
+                            mVibrator.vibrate(100);
+                            closeCamera();
+                            Intent intent = new Intent();
+                            //                        if (fieldvalue[1] == null) {
 //                            color = "null";
 //                        }
 //                        int left = prp.plateIDCfg.left;
@@ -1006,7 +1023,7 @@ public class ScenCameraActivity extends Activity implements
 //                        int w = prp.plateIDCfg.right - prp.plateIDCfg.left;
 //                        int h = prp.plateIDCfg.bottom - prp.plateIDCfg.top;
 
-                        intent.putExtra("number", number);
+                            intent.putExtra("number", number);
 //                        intent.putExtra("color", color);
 ////                        intent.putExtra("path", path);
 //                        intent.putExtra("left", left);
@@ -1016,8 +1033,9 @@ public class ScenCameraActivity extends Activity implements
 //                        intent.putExtra("time", fieldvalue[11]);
 //                        intent.putExtra("recogType", recogType);
 //                        intent.putExtra("isatuo", true);//是否自动，true自动
-                        setResult(RESULT_OK, intent);
-                        this.finish();
+                            setResult(RESULT_OK, intent);
+                            this.finish();
+                        }
 //						}
                     }
                 }
