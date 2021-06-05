@@ -27,6 +27,6 @@ dependencies {
 
 //    implementation fileTree(dir: 'libs', include: ['*.jar'])
 //    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation project(path: ':licenseplatelib')
 }
